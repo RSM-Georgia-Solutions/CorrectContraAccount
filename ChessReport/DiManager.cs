@@ -16,6 +16,11 @@ namespace ChessReport
                 .Application
                 .SBO_Application
                 .Company.GetDICompany());
+        public static Recordset Recordset => recSet.Value;
+        private static readonly Lazy<Recordset> recSet =
+           new Lazy<SAPbobsCOM.Recordset>(() => (Recordset)
+               Company
+                   .GetBusinessObject(BoObjectTypes.BoRecordset));
 
         public static string CreateTable(string tableName, string tableDescription, BoUTBTableType tableType)
         {

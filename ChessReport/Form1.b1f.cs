@@ -27,6 +27,9 @@ namespace ChessReport
             this.EditText1 = ((SAPbouiCOM.EditText)(this.GetItem("Item_2").Specific));
             this.StaticText0 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_3").Specific));
             this.StaticText1 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_4").Specific));
+            this.CheckBox0 = ((SAPbouiCOM.CheckBox)(this.GetItem("Item_5").Specific));
+            this.EditText2 = ((SAPbouiCOM.EditText)(this.GetItem("Item_6").Specific));
+            this.StaticText2 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_7").Specific));
             this.OnCustomInitialize();
 
         }
@@ -48,16 +51,30 @@ namespace ChessReport
         private void Button0_PressedAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
             //ვიღებთ ტრანზაქციას და ვწერთ მოდელში
+            int maxLine;
+            bool isNumeric = int.TryParse(EditText2.Value, out maxLine);            
+            bool MustSkip = CheckBox0.Checked;
             List<JournalEntryLineModel> jdtLines = new List<JournalEntryLineModel>();
             Recordset recSet = (Recordset)DiManager.Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-            recSet.DoQuery($@"SELECT *
+
+            if (MustSkip)
+            {
+                recSet.DoQuery($@"SELECT *
             FROM JDT1
             LEFT JOIN OJDT ON JDT1.TransId = OJDT.TransId
-            WHERE CONVERT(DATE, ojdt.RefDate) >= '{EditText0.Value}'
+            WHERE CONVERT(DATE, OJDT.RefDate) >= '{EditText0.Value}'
+            AND CONVERT(DATE, OJDT.RefDate) <= '{EditText1.Value}' AND U_CorrectContraAcc is null AND OJDT.TransId Not In (select TransId from JDT1 where Line_ID > {maxLine}) ORDER BY OJDT.RefDate, OJDT.TransId, Line_ID");
+            }
+            else
+            {
+                recSet.DoQuery($@"SELECT *
+            FROM JDT1
+            LEFT JOIN OJDT ON JDT1.TransId = OJDT.TransId
+            WHERE CONVERT(DATE, OJDT.RefDate) >= '{EditText0.Value}'
+            AND CONVERT(DATE, OJDT.RefDate) <= '{EditText1.Value}'  AND OJDT.TransId NOT IN (select TransId from JDT1 where Line_ID > {maxLine}) ORDER BY OJDT.RefDate, OJDT.TransId, Line_ID");
+            }
 
-            AND CONVERT(DATE, ojdt.RefDate) <= '{EditText1.Value}'");             
-            
-            // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 3209");
+           // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 126691");
             while (!recSet.EoF)
             {
                 JournalEntryLineModel model = new JournalEntryLineModel
@@ -95,16 +112,13 @@ namespace ChessReport
 
                     if (maxCreditLine.Credit == maxDebitLine.Debit)
                     {
-                       // maxCreditLine.CorrectContraAccount = maxDebitLine.Account;
                         maxDebitLine.CorrectContraAccount = maxCreditLine.Account;
                         maxDebitLine.ContraAccountLineId = maxCreditLine.LineId;
                         maxDebitLine.CorrectContraShortName = maxCreditLine.SortName;
-                        //maxCreditLine.Update();
-                     var x =   maxDebitLine.Update();
-                    var y =    DiManager.Company.GetLastErrorDescription();
+                        maxDebitLine.UpdateSql();
                         maxCreditLine.CorrectContraAccount = "SourceSimple";
                         maxCreditLine.ContraAccountLineId = -1;
-                        maxCreditLine.Update();
+                        maxCreditLine.UpdateSql();
                         creditLines.Remove(maxCreditLine);
                         debitLines.Remove(maxDebitLine);
                     }
@@ -117,11 +131,11 @@ namespace ChessReport
                             journalEntryLineModel.CorrectContraAccount = maxCreditLine.Account;
                             journalEntryLineModel.CorrectContraShortName = maxCreditLine.SortName;
                             journalEntryLineModel.ContraAccountLineId = maxCreditLine.LineId;
-                            journalEntryLineModel.Update();
+                            journalEntryLineModel.UpdateSql();
                         }
                         maxCreditLine.CorrectContraAccount = "SourceComplex";
                         maxCreditLine.ContraAccountLineId = -1;
-                        maxCreditLine.Update();
+                        maxCreditLine.UpdateSql();
                         creditLines.Remove(maxCreditLine);
                         debitLines = debitLines.Except(sources).ToList();
                     }
@@ -133,11 +147,11 @@ namespace ChessReport
                             journalEntryLineModel.CorrectContraAccount = maxDebitLine.Account;
                             journalEntryLineModel.CorrectContraShortName = maxDebitLine.SortName;
                             journalEntryLineModel.ContraAccountLineId = maxDebitLine.LineId;
-                            journalEntryLineModel.Update();
+                            journalEntryLineModel.UpdateSql();
                         }
                         maxDebitLine.CorrectContraAccount = "SourceComplex";
                         maxDebitLine.ContraAccountLineId = -1;
-                        maxDebitLine.Update();
+                        maxDebitLine.UpdateSql();
                         debitLines.Remove(maxDebitLine);
                         creditLines = creditLines.Except(sources).ToList();
                     }
@@ -145,7 +159,7 @@ namespace ChessReport
 
                 increment++;
                 Application.SBO_Application.SetStatusBarMessage($"{increment} of {total}",
-                    BoMessageTime.bmt_Short,false);
+                    BoMessageTime.bmt_Short, false);
             }
 
             SAPbouiCOM.Framework.Application.SBO_Application.MessageBox("SUCCESS");
@@ -155,5 +169,8 @@ namespace ChessReport
         private EditText EditText1;
         private StaticText StaticText0;
         private StaticText StaticText1;
+        private CheckBox CheckBox0;
+        private EditText EditText2;
+        private StaticText StaticText2;
     }
 }
