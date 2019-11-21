@@ -45,7 +45,7 @@ namespace ChessReport
                 // Create s sub menu
                 oCreationPackage.Type = SAPbouiCOM.BoMenuType.mt_STRING;
                 oCreationPackage.UniqueID = "ChessReport.Form1";
-                oCreationPackage.String = "Form1";
+                oCreationPackage.String = "CorrectContraAccount";
                 oMenus.AddEx(oCreationPackage);
             }
             catch (Exception er)

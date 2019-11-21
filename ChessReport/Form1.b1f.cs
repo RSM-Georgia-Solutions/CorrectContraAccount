@@ -6,6 +6,9 @@ using SAPbobsCOM;
 using SAPbouiCOM;
 using SAPbouiCOM.Framework;
 using Application = SAPbouiCOM.Framework.Application;
+using System.Diagnostics;
+using System.Timers;
+using System.Threading.Tasks;
 
 namespace ChessReport
 {
@@ -51,8 +54,9 @@ namespace ChessReport
         private void Button0_PressedAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
             //ვიღებთ ტრანზაქციას და ვწერთ მოდელში
-            int maxLine;
-            bool isNumeric = int.TryParse(EditText2.Value, out maxLine);            
+            int maxLine = 10000;
+            int totalSuccess = 0;
+            bool isNumeric = int.TryParse(EditText2.Value, out maxLine);
             bool MustSkip = CheckBox0.Checked;
             List<JournalEntryLineModel> jdtLines = new List<JournalEntryLineModel>();
             Recordset recSet = (Recordset)DiManager.Company.GetBusinessObject(BoObjectTypes.BoRecordset);
@@ -74,7 +78,7 @@ namespace ChessReport
             AND CONVERT(DATE, OJDT.RefDate) <= '{EditText1.Value}'  AND OJDT.TransId NOT IN (select TransId from JDT1 where Line_ID > {maxLine}) ORDER BY OJDT.RefDate, OJDT.TransId, Line_ID");
             }
 
-           // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 126691");
+            // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 126426");
             while (!recSet.EoF)
             {
                 JournalEntryLineModel model = new JournalEntryLineModel
@@ -97,8 +101,10 @@ namespace ChessReport
                 .GroupBy(x => x.TransId);
             int increment = 0;
             int total = groupBy.Count();
+
             foreach (IGrouping<int, JournalEntryLineModel> journalEntryLineModels in groupBy)
             {
+
                 int transId = journalEntryLineModels.Key; //ტრანზაქციის ID
                 List<JournalEntryLineModel> debitLines = journalEntryLineModels.Where(x => x.Debit != 0).Select(x => x).ToList();// სტრიქონები სადაც დებიტი არაა 0
                 List<JournalEntryLineModel> creditLines = journalEntryLineModels.Where(x => x.Credit != 0).Select(x => x).ToList();// სტრიქონები სადაც კრედიტი არაა 0

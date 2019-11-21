@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,11 @@ namespace ChessReport
 {
     public class Solver
     {
-
+        Stopwatch stopwatch;
         public List<JournalEntryLineModel> SolveCombinations(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines)
         {
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
             _sourceLines = new List<JournalEntryLineModel>();
             RecursiveSolveCombinations(targetLine,0,new List<JournalEntryLineModel>(),searchLines,0);
             return _sourceLines;
@@ -19,10 +22,14 @@ namespace ChessReport
         private List<JournalEntryLineModel> _sourceLines;
 
         public void RecursiveSolveCombinations(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
-        {
+        {           
             var roundTotalsAccuracy = DiManager.Company.GetCompanyService().GetAdminInfo().TotalsAccuracy;
             for (int index = startIndex; index < notIncluded.Count; index++)
             {
+                if (stopwatch.ElapsedMilliseconds > 1)
+                {
+                    return;
+                }
                 double goal = targetLine.Debit == 0 ? targetLine.Credit : targetLine.Debit;
                 JournalEntryLineModel nextLine = notIncluded[index];
                 double nextAmount = nextLine.Debit == 0? nextLine.Credit: nextLine.Debit;
