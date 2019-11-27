@@ -78,7 +78,7 @@ namespace ChessReport
             AND CONVERT(DATE, OJDT.RefDate) <= '{EditText1.Value}'  AND OJDT.TransId NOT IN (select TransId from JDT1 where Line_ID > {maxLine}) ORDER BY OJDT.RefDate, OJDT.TransId, Line_ID");
             }
 
-            // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 126426");
+           // recSet.DoQuery($@"SELECT * FROM JDT1 WHERE TransId = 131270");
             while (!recSet.EoF)
             {
                 JournalEntryLineModel model = new JournalEntryLineModel
@@ -115,6 +115,17 @@ namespace ChessReport
                 {
                     JournalEntryLineModel maxDebitLine = debitLines.Where(x => Math.Abs(x.Debit) == debitLines.Max(y => Math.Abs(y.Debit))).ToList().First();// მაქსიმალური დებიტის თანხა
                     JournalEntryLineModel maxCreditLine = creditLines.Where(x => Math.Abs(x.Credit) == creditLines.Max(y => Math.Abs(y.Credit))).ToList().First();// მაქსიმალური კრედიტის თანხა
+
+                    var positiveDr = debitLines.Where(x => x.Debit > 0).Count();
+                    var negatviveDr = debitLines.Where(x => x.Debit < 0).Count();
+
+                    var positiveCr = creditLines.Where(x => x.Credit > 0).Count();
+                    var negatviveCr = creditLines.Where(x => x.Credit < 0).Count();
+
+                    if ((positiveDr > 0 && negatviveDr > 0) || positiveCr >0 && negatviveCr > 0)
+                    {
+                        break;
+                    }
 
                     if (maxCreditLine.Credit == maxDebitLine.Debit)
                     {

@@ -26,7 +26,7 @@ namespace ChessReport
             var roundTotalsAccuracy = DiManager.Company.GetCompanyService().GetAdminInfo().TotalsAccuracy;
             for (int index = startIndex; index < notIncluded.Count; index++)
             {
-                if (stopwatch.ElapsedMilliseconds > 1)
+                if (stopwatch.ElapsedMilliseconds > 4000)
                 {
                     return;
                 }
