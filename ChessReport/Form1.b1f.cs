@@ -54,6 +54,8 @@ namespace ChessReport
         private void Button0_PressedAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
             //ვიღებთ ტრანზაქციას და ვწერთ მოდელში
+            Stopwatch st = new Stopwatch();
+            st.Start();
             int maxLine = 10000;
             int totalSuccess = 0;
             bool isNumeric = int.TryParse(EditText2.Value, out maxLine);
@@ -122,7 +124,7 @@ namespace ChessReport
                     var positiveCr = creditLines.Where(x => x.Credit > 0).Count();
                     var negatviveCr = creditLines.Where(x => x.Credit < 0).Count();
 
-                    if ((positiveDr > 0 && negatviveDr > 0) || positiveCr >0 && negatviveCr > 0)
+                    if ((positiveDr > 0 && negatviveDr > 0) || (positiveCr > 0 && negatviveCr > 0) || (positiveDr > 0 && negatviveCr > 0) || (positiveCr > 0 && negatviveDr > 0))
                     {
                         break;
                     }
@@ -178,7 +180,8 @@ namespace ChessReport
                 Application.SBO_Application.SetStatusBarMessage($"{increment} of {total}",
                     BoMessageTime.bmt_Short, false);
             }
-
+            var wastedMinutes = st.ElapsedMilliseconds / 60000;
+            st.Stop();
             SAPbouiCOM.Framework.Application.SBO_Application.MessageBox("SUCCESS");
         }
 
