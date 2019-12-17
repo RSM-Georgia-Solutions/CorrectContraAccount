@@ -11,11 +11,16 @@ namespace ChessReport
     {
         public static Company Company => XCompany.Value;
 
+        public static int RoundAccuracy => XRoundAccuracy.Value;
+
         private static readonly Lazy<Company> XCompany =
             new Lazy<Company>(() => (Company)SAPbouiCOM.Framework
                 .Application
                 .SBO_Application
                 .Company.GetDICompany());
+
+        private static readonly Lazy<int> XRoundAccuracy =
+            new Lazy<int>(() => Company.GetCompanyService().GetAdminInfo().TotalsAccuracy);
         public static Recordset Recordset => recSet.Value;
         private static readonly Lazy<Recordset> recSet =
            new Lazy<SAPbobsCOM.Recordset>(() => (Recordset)

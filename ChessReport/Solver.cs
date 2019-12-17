@@ -15,27 +15,70 @@ namespace ChessReport
             stopwatch = new Stopwatch();
             stopwatch.Start();
             _sourceLines = new List<JournalEntryLineModel>();
-            RecursiveSolveCombinations(targetLine,0,new List<JournalEntryLineModel>(),searchLines,0);
+            RecursiveSolveCombinations(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0);
+            return _sourceLines;
+        }
+
+        public List<JournalEntryLineModel> SolveCombinationsNegative(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines)
+        {
+            //stopwatch = new Stopwatch();
+           // stopwatch.Start();
+            _sourceLines = new List<JournalEntryLineModel>();
+            RecursiveSolveCombinationsNegative(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0);
             return _sourceLines;
         }
 
         private List<JournalEntryLineModel> _sourceLines;
 
-        public void RecursiveSolveCombinations(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
-        {           
+        private void RecursiveSolveCombinations(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
+        {
+            var roundTotalsAccuracy = DiManager.RoundAccuracy;
+            for (int index = startIndex; index < notIncluded.Count; index++)
+            {
+                //if (stopwatch.ElapsedMilliseconds > 4000)
+                //{
+                //    return;
+                //}
+                double goal = targetLine.Debit == 0 ? targetLine.Credit : targetLine.Debit;
+                JournalEntryLineModel nextLine = notIncluded[index];
+                double nextAmount = nextLine.Debit == 0 ? nextLine.Credit : nextLine.Debit;
+                double amountToCompare = Math.Round(currentSum + nextAmount, roundTotalsAccuracy);
+
+                if (amountToCompare == goal)
+                {
+                    List<JournalEntryLineModel> newResult = new List<JournalEntryLineModel>(included);
+                    newResult.Add(nextLine);
+                    _sourceLines = newResult;
+                    return;
+                }
+                else if (Math.Abs(amountToCompare) < Math.Abs(goal))
+                {
+                    List<JournalEntryLineModel> nextIncuded = new List<JournalEntryLineModel>(included);
+                    nextIncuded.Add(nextLine);
+                    List<JournalEntryLineModel> nextNonIncluded = new List<JournalEntryLineModel>(notIncluded);
+                    nextNonIncluded.Remove(nextLine);
+                    RecursiveSolveCombinations(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++);
+                }
+            }
+        }
+
+
+        private void RecursiveSolveCombinationsNegative(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
+        {
             var roundTotalsAccuracy = DiManager.Company.GetCompanyService().GetAdminInfo().TotalsAccuracy;
             for (int index = startIndex; index < notIncluded.Count; index++)
             {
-                if (stopwatch.ElapsedMilliseconds > 4000)
-                {
-                    return;
-                }
+                //if (stopwatch.ElapsedMilliseconds > 4000)
+                //{
+                //    return;
+                //}
+
                 double goal = targetLine.Debit == 0 ? targetLine.Credit : targetLine.Debit;
                 JournalEntryLineModel nextLine = notIncluded[index];
-                double nextAmount = nextLine.Debit == 0? nextLine.Credit: nextLine.Debit;
-                double amountToCompare = Math.Round(currentSum + nextAmount,roundTotalsAccuracy);
+                double nextAmount = nextLine.Debit == 0 ? nextLine.Credit : nextLine.Debit;
+                double amountToCompare = Math.Round(currentSum + nextAmount, roundTotalsAccuracy);
 
-                if (amountToCompare == goal)
+                if (amountToCompare + goal == 0)
                 {
                     List<JournalEntryLineModel> newResult = new List<JournalEntryLineModel>(included);
                     newResult.Add(nextLine);
@@ -47,7 +90,7 @@ namespace ChessReport
                     nextIncuded.Add(nextLine);
                     List<JournalEntryLineModel> nextNonIncluded = new List<JournalEntryLineModel>(notIncluded);
                     nextNonIncluded.Remove(nextLine);
-                    RecursiveSolveCombinations(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++);
+                    RecursiveSolveCombinationsNegative(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++);
                 }
             }
         }

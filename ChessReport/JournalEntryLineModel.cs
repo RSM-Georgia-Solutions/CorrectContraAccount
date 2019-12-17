@@ -34,7 +34,7 @@ namespace ChessReport
         {
             Recordset rec = (Recordset)DiManager.Company.GetBusinessObject(BoObjectTypes.BoRecordset);
             string query = $"UPDATE JDT1 Set U_CorrectContraAcc = '{CorrectContraAccount}', U_CorrectContraShortName = '{CorrectContraShortName ?? ""}', U_ContraAccountLineId = '{ContraAccountLineId.ToString()}' WHERE TransId = {TransId} AND Line_ID = {LineId}";
-            rec.DoQuery(query);                    
+            rec.DoQuery(query);
         }
     }
 }
