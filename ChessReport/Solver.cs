@@ -10,35 +10,35 @@ namespace ChessReport
     public class Solver
     {
         Stopwatch stopwatch;
-        public List<JournalEntryLineModel> SolveCombinations(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines)
+        public List<JournalEntryLineModel> SolveCombinations(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines, int milliseconds)
         {
             stopwatch = new Stopwatch();
             stopwatch.Start();
             _sourceLines = new List<JournalEntryLineModel>();
-            RecursiveSolveCombinations(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0);
+            RecursiveSolveCombinations(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0, milliseconds);
             return _sourceLines;
         }
 
-        public List<JournalEntryLineModel> SolveCombinationsNegative(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines)
+        public List<JournalEntryLineModel> SolveCombinationsNegative(JournalEntryLineModel targetLine, List<JournalEntryLineModel> searchLines, int milliseconds)
         {
             //stopwatch = new Stopwatch();
-           // stopwatch.Start();
+            // stopwatch.Start();
             _sourceLines = new List<JournalEntryLineModel>();
-            RecursiveSolveCombinationsNegative(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0);
+            RecursiveSolveCombinationsNegative(targetLine, 0, new List<JournalEntryLineModel>(), searchLines, 0, milliseconds);
             return _sourceLines;
         }
 
         private List<JournalEntryLineModel> _sourceLines;
 
-        private void RecursiveSolveCombinations(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
+        private void RecursiveSolveCombinations(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex, int milliseconds)
         {
             var roundTotalsAccuracy = DiManager.RoundAccuracy;
             for (int index = startIndex; index < notIncluded.Count; index++)
             {
-                //if (stopwatch.ElapsedMilliseconds > 4000)
-                //{
-                //    return;
-                //}
+                if (stopwatch.ElapsedMilliseconds > milliseconds)
+                {
+                    return;
+                }
                 double goal = targetLine.Debit == 0 ? targetLine.Credit : targetLine.Debit;
                 JournalEntryLineModel nextLine = notIncluded[index];
                 double nextAmount = nextLine.Debit == 0 ? nextLine.Credit : nextLine.Debit;
@@ -57,13 +57,13 @@ namespace ChessReport
                     nextIncuded.Add(nextLine);
                     List<JournalEntryLineModel> nextNonIncluded = new List<JournalEntryLineModel>(notIncluded);
                     nextNonIncluded.Remove(nextLine);
-                    RecursiveSolveCombinations(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++);
+                    RecursiveSolveCombinations(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++, milliseconds);
                 }
             }
         }
 
 
-        private void RecursiveSolveCombinationsNegative(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex)
+        private void RecursiveSolveCombinationsNegative(JournalEntryLineModel targetLine, double currentSum, List<JournalEntryLineModel> included, List<JournalEntryLineModel> notIncluded, int startIndex, int milliseconds)
         {
             var roundTotalsAccuracy = DiManager.Company.GetCompanyService().GetAdminInfo().TotalsAccuracy;
             for (int index = startIndex; index < notIncluded.Count; index++)
@@ -90,7 +90,7 @@ namespace ChessReport
                     nextIncuded.Add(nextLine);
                     List<JournalEntryLineModel> nextNonIncluded = new List<JournalEntryLineModel>(notIncluded);
                     nextNonIncluded.Remove(nextLine);
-                    RecursiveSolveCombinationsNegative(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++);
+                    RecursiveSolveCombinationsNegative(targetLine, amountToCompare, nextIncuded, nextNonIncluded, startIndex++, milliseconds);
                 }
             }
         }

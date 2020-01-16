@@ -37,6 +37,8 @@ namespace ChessReport
             this.Button1.PressedAfter += new SAPbouiCOM._IButtonEvents_PressedAfterEventHandler(this.Button1_PressedAfter);
             this.StaticText3 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_9").Specific));
             this.EditText3 = ((SAPbouiCOM.EditText)(this.GetItem("Item_10").Specific));
+            this.StaticText4 = ((SAPbouiCOM.StaticText)(this.GetItem("Item_11").Specific));
+            this.EditText4 = ((SAPbouiCOM.EditText)(this.GetItem("Item_12").Specific));
             this.OnCustomInitialize();
 
         }
@@ -153,7 +155,7 @@ namespace ChessReport
 
                     if (Math.Abs(maxCreditLine.Credit) > Math.Abs(maxDebitLine.Debit))
                     {
-                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxCreditLine, debitLines);
+                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxCreditLine, debitLines, int.Parse(EditText4.Value) * 1000);
                         foreach (JournalEntryLineModel journalEntryLineModel in sources)
                         {
                             journalEntryLineModel.CorrectContraAccount = maxCreditLine.Account;
@@ -169,7 +171,7 @@ namespace ChessReport
                     }
                     else if (Math.Abs(maxDebitLine.Debit) > Math.Abs(maxCreditLine.Credit))
                     {
-                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxDebitLine, creditLines);
+                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxDebitLine, creditLines, int.Parse(string.IsNullOrWhiteSpace(EditText4.Value)?"100":EditText4.Value) * 1000);
                         foreach (JournalEntryLineModel journalEntryLineModel in sources)
                         {
                             journalEntryLineModel.CorrectContraAccount = maxDebitLine.Account;
@@ -359,7 +361,7 @@ namespace ChessReport
                             creditLines = new List<JournalEntryLineModel>() { maxCreditLine };
 
                         }
-                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxCreditLine, debitLines);
+                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxCreditLine, debitLines, int.Parse(string.IsNullOrWhiteSpace(EditText4.Value) ? "100" : EditText4.Value) * 1000);
                         foreach (JournalEntryLineModel journalEntryLineModel in sources)
                         {
                             journalEntryLineModel.CorrectContraAccount = maxCreditLine.Account;
@@ -387,7 +389,7 @@ namespace ChessReport
                             debitLines = new List<JournalEntryLineModel>() { maxDebitLine };
 
                         }
-                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxDebitLine, creditLines);
+                        List<JournalEntryLineModel> sources = _solver.SolveCombinations(maxDebitLine, creditLines, int.Parse(string.IsNullOrWhiteSpace(EditText4.Value) ? "100" : EditText4.Value) * 1000);
                         foreach (JournalEntryLineModel journalEntryLineModel in sources)
                         {
                             journalEntryLineModel.CorrectContraAccount = maxDebitLine.Account;
@@ -414,5 +416,7 @@ namespace ChessReport
 
         private StaticText StaticText3;
         private EditText EditText3;
+        private StaticText StaticText4;
+        private EditText EditText4;
     }
 }
