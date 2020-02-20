@@ -31,7 +31,7 @@ namespace ChessReport
                 //  If the manu already exists this code will fail
                 oMenus.AddEx(oCreationPackage);
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
@@ -48,9 +48,9 @@ namespace ChessReport
                 oCreationPackage.String = "CorrectContraAccount";
                 oMenus.AddEx(oCreationPackage);
             }
-            catch (Exception er)
+            catch (Exception)
             { //  Menu already exists
-                Application.SBO_Application.SetStatusBarMessage("Menu Already Exists", SAPbouiCOM.BoMessageTime.bmt_Short, true);
+                Application.SBO_Application.SetStatusBarMessage("Menu Already Exists", SAPbouiCOM.BoMessageTime.bmt_Short);
             }
         }
 
@@ -68,7 +68,7 @@ namespace ChessReport
             }
             catch (Exception ex)
             {
-                Application.SBO_Application.MessageBox(ex.ToString(), 1, "Ok", "", "");
+                Application.SBO_Application.MessageBox(ex.ToString());
             }
         }
 
