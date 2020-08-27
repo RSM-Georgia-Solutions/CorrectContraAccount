@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Timers;
 using System.Threading.Tasks;
 using CorrectContraAccountLogicDLL;
+using System.Globalization;
 
 namespace ChessReport
 {
@@ -57,17 +58,28 @@ namespace ChessReport
         }
         private void Button0_PressedAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
-            CorrectionLogic logic = new CorrectionLogic(DiManager.RoundAccuracy, DiManager.Company);
-            int maxLine;
-            int.TryParse(EditText2.Value,
-               out maxLine);
-            bool mustSkip = CheckBox0.Checked;
-            string startDate = EditText0.Value;
-            string endDate = EditText1.Value;
+            CorrectionLogic logic = new CorrectionLogic( DiManager.Company);
             string transIdParam = EditText3.Value;
             string waitingTimeString = EditText4.Value;
+
             int waitingTime = int.Parse(waitingTimeString);
-            logic.CorrectionJournalEntries(maxLine, mustSkip, startDate, endDate, waitingTime, transIdParam);
+
+            if (!string.IsNullOrWhiteSpace(transIdParam))
+            {
+                logic.CorrectionJournalEntries(transIdParam);
+            }
+            else
+            {
+                int maxLine;
+                int.TryParse(EditText2.Value,
+                    out maxLine);
+                bool mustSkip = CheckBox0.Checked;
+                string startDate = EditText0.Value;
+                string endDate = EditText1.Value;
+
+                CultureInfo provider = CultureInfo.InvariantCulture;
+                logic.CorrectionJournalEntries(new CorrectionJournalEntriesParams { MaxLine = maxLine, MustSkip = mustSkip, StartDate = DateTime.ParseExact(startDate,"yyyyMMdd", provider), EndDate = DateTime.ParseExact(endDate, "yyyyMMdd", provider), WaitingTimeInMinutes = waitingTime });
+            }
         }
         private EditText EditText0;
         private EditText EditText1;
@@ -80,16 +92,13 @@ namespace ChessReport
 
         private void Button1_PressedAfter(object sboObject, SBOItemEventArg pVal)
         {
-            CorrectionLogic logic = new CorrectionLogic(DiManager.RoundAccuracy, DiManager.Company);
-            int maxLine;
-            int.TryParse(EditText2.Value,
-                out maxLine);
-            bool mustSkip = CheckBox0.Checked;
-            string startDate = EditText0.Value;
-            string endDate = EditText1.Value;
+            CorrectionLogic logic = new CorrectionLogic(DiManager.Company);
+         
             string transIdParam = EditText3.Value;
             string waitingTimeString = EditText4.Value;
+
             int waitingTime = int.Parse(waitingTimeString);
+
             if (!string.IsNullOrWhiteSpace(transIdParam))
             {
                 logic.CorrectionJournalEntriesSecondLogic(transIdParam,
@@ -97,7 +106,15 @@ namespace ChessReport
             }
             else
             {
-                logic.CorrectionJournalEntriesSecondLogic(maxLine, mustSkip, startDate, endDate, waitingTime);
+                int maxLine;
+                int.TryParse(EditText2.Value,
+                    out maxLine);
+                bool mustSkip = CheckBox0.Checked;
+                string startDate = EditText0.Value;
+                string endDate = EditText1.Value;
+                CultureInfo provider = CultureInfo.InvariantCulture;
+
+                logic.CorrectionJournalEntriesSecondLogic(new CorrectionJournalEntriesParams { MaxLine = maxLine, MustSkip = mustSkip, StartDate = DateTime.ParseExact(startDate, "yyyyMMdd", provider), EndDate = DateTime.ParseExact(endDate, "yyyyMMdd", provider), WaitingTimeInMinutes = waitingTime });
             }
         }
         private StaticText StaticText3;

@@ -110,7 +110,7 @@ namespace ChessReport
         {
             // Get a new Recordset object
             Recordset oRecordSet = (Recordset)Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-            string sqlQuery = $"SELECT T0.TableID, T0.FieldID FROM CUFD T0 WHERE T0.TableID = '{tablename}' AND T0.AliasID = '{fieldname}'";
+            string sqlQuery = $"SELECT T0.TableID, T0.FieldID FROM CUFD T0 WHERE T0.TableID = '@{tablename}' AND T0.AliasID = '{fieldname}'";
             oRecordSet.DoQuery(sqlQuery);
             var updateFlag = oRecordSet.RecordCount == 1;
             var fieldId = int.Parse(oRecordSet.Fields.Item("FieldID").Value.ToString());
@@ -119,7 +119,8 @@ namespace ChessReport
             UserFieldsMD oUfield = (UserFieldsMD)Company.GetBusinessObject(BoObjectTypes.oUserFields);
             if (updateFlag)
             {
-                oUfield.GetByKey(tablename, fieldId);
+                return "";
+                //oUfield.GetByKey(tablename, fieldId);
             }
             try
             {
